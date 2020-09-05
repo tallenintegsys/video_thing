@@ -1,0 +1,10 @@
+
+.built-in.a.cmd
+*.swp
+*.cmd
+Module.symvers
+*.a
+modules.order
+*.ko
+*.mod*
+*.o
