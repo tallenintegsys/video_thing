@@ -59,6 +59,8 @@ static struct pci_driver thing_driver = {
  *
  */
 static int __init thing_init(void) {
+	printk("[%s:init] called\n",DRIVER_NAME);
+
 	class = class_create(THIS_MODULE, "video_thing");
 	if(!class) {
 		printk (KERN_ERR "[%s:init] unable to create class device\n",DRIVER_NAME);
@@ -89,6 +91,12 @@ static int thing_probe(struct pci_dev *pdev, const struct pci_device_id *id) {
 
 	printk("[%s:probe] called\n",DRIVER_NAME);
 
+	err = pci_enable_device(pdev);
+	if (err) {
+		printk(KERN_ERR "[%s:probe] pci_enable_device returned %d\n",DRIVER_NAME, err);
+        return -ENODEV;
+	}
+
 	//begin filling out the context struct
 	context = kzalloc(sizeof *context, GFP_KERNEL);
 	if (!context) {
@@ -99,12 +107,6 @@ static int thing_probe(struct pci_dev *pdev, const struct pci_device_id *id) {
 	pci_set_drvdata(pdev, (void*)context); // store *context indexed by pdev
 	context->card = cards++; // card number in arbitrary order
 	context->pdev = pdev;
-
-	err = pci_enable_device(pdev);
-	if (err) {
-		printk(KERN_ERR "[%s:probe] pci_enable_device returned %d\n",DRIVER_NAME, err);
-        return -ENODEV;
-	}
 
 	err = pci_request_region(pdev, 0, DRIVER_NAME);
 	if (err) {
